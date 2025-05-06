@@ -1,10 +1,11 @@
 const fs = require('fs');
 const mqtt = require('mqtt');
-const client = mqtt.connect('mqtt://172.17.2.86');
+const client = mqtt.connect('mqtt://user:passwd@xxx.xxx.xxx.xxx',{clientId:"rockrobo"});//enter your mqtt-server credentials here
 
 // Subscribe Topics
 client.on('connect', () => {
 	console.log("Connected");
+    	client.publish("rockrobo/map/log", "Connected");//added log via mqtt
 	client.subscribe('rockrobo/map/load');
 	client.subscribe('rockrobo/map/save');
 });
@@ -16,6 +17,8 @@ client.on('message', (topic, message) => {
 		var destination = '/mnt/data/rockrobo/';
 
 		console.log("Received Load Request: " + message);
+
+        	client.publish("rockrobo/map/log", "Received Load Request: " + message);//added log via mqtt
 		copyFiles(source, destination);
 	}
 
@@ -24,21 +27,32 @@ client.on('message', (topic, message) => {
 		var destination = '/mnt/data/maploader/maps/' + message + '/';
 
 		console.log("Received Save Request: " + message);
+        	client.publish("rockrobo/map/log", "Received Save Request: " + message);//added log via mqtt
 		copyFiles(source, destination);
 	}
 });
 
-// Backup or restore map files
+// Backup or restore map files, destinations edited for v1-specific files
 function copyFiles(source, destination) {
-	const files = ['user_map0', 'last_map', 'PersistData_1.data', 'PersistData_2.data'];
+    const files = ['last_map', 'ChargerPos.data', 'StartPos.data'];
 
-	if (!fs.existsSync(destination)){
-		fs.mkdirSync(destination);
-		console.log('Created directory: ' + destination);
-	}
+    if (!fs.existsSync(destination)){
+        fs.mkdirSync(destination, { recursive: true });
+        console.log('Created directory: ' + destination);
+        client.publish("rockrobo/map/log", 'Created directory: ' + destination);
+    }
 
-	for (i = 0; i < files.length; i++) {
-		fs.copyFileSync(source + files[i], destination + files[i]);
-		console.log('Copied ' + files[i] + ' from ' + source + ' to ' + destination);
-	}
+    for (const file of files) {
+        const srcFile = source + file;
+        const destFile = destination + file;
+
+        if (!fs.existsSync(srcFile)) {
+            console.log('Error: ' + srcFile + ' not found');
+            client.publish("rockrobo/map/log", 'Error: ' + file + ' not found');
+        } else {
+            fs.copyFileSync(srcFile, destFile);
+            console.log('Copied ' + file + ' from ' + source + ' to ' + destination);
+            client.publish("rockrobo/map/log", 'Copied ' + file + ' from ' + source + ' to ' + destination);
+        }
+    }
 }
