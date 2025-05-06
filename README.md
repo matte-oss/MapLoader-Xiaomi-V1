@@ -1,8 +1,11 @@
 # MapLoader
 Map Backup/Restore for Xiaomi Vacuum and Roborock
 
+## About this fork
+I made this fork because map loader wasn't working on my v1 vacuum because the map was saved in different files.
+
 ## Description
-MapLoader is a NodeJS based service, running on the robot that listens to MQTT commands.\
+MapLoader is a NodeJS based service, running on the robot that listens to MQTT commands.
 Available topics:
 * rockrobo/map/load
 * rockrobo/map/save
@@ -45,25 +48,25 @@ apt-get install nano wget xz-utils
 mkdir /mnt/data/node
 cd /mnt/data/node
 ```
-Get the link for the current NodeJS ARM7 binary package from here: https://nodejs.org/en/download/ \
-Download and extract (replace `<version>` and `<distro>` with the content of the file you downloaded):
+Install NodeJS v11.15.0 ARM7
 ```
-wget <link from above>
-sudo tar -xJvf node-<version>-<distro>.tar.xz -C /mnt/data/node/
-rm node-<version>-<distro>.tar.xz
+wget https://nodejs.org/download/release/v11.15.0/node-v11.15.0-linux-armv7l.tar.xz
+
+sudo tar -xJvf node-v11.15.0-linux-armv7l.tar.xz -C /mnt/data/node/
+rm node-v11.15.0-linux-armv7l.tar.xz
 ```
 Add the NodeJS path to the profile of the root user:
 ```
 nano /etc/environment
 ```
-Add _/mnt/data/node/node-`<version>`-`<distro>`/bin_ to the PATH variable.\
+Add _/mnt/data/node/node-v11.15.0-linux-armv7l/bin_ to the PATH variable.\
 Example:
 ```
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/data/node/node-v10.16.0-linux-armv7l/bin"
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/data/node/node-v11.15.0-linux-armv7l/bin"
 ```
 Append this line at the end of the file (replace `<version>` and `<distro>` to match the path of your node installation):
 ```
-NODE_PATH="/mnt/data/node/node-<version>-<distro>/lib/node_modules"
+NODE_PATH="/mnt/data/node/node-v11.15.0-linux-armv7l/lib/node_modules"
 ```
 **4. Test your node installation**\
 Log out of SSH and login again to load the new environment variables
@@ -74,15 +77,16 @@ Output should be the version and not a _command not found_ error
 
 **5. Create Symlinks**\
 ```
-sudo ln -s /mnt/data/node/node-<version>-<distro>/bin/node /usr/bin/node
-sudo ln -s /mnt/data/node/node-<version>-<distro>/bin/npm /usr/bin/npm
-sudo ln -s /mnt/data/node/node-<version>-<distro>/bin/npx /usr/bin/npx
+sudo ln -s /mnt/data/node/node-v11.15.0-linux-armv7l/bin/node /usr/bin/node
+sudo ln -s /mnt/data/node/node-v11.15.0-linux-armv7l/bin/npm /usr/bin/npm
+
+sudo ln -s /mnt/data/node/node-v11.15.0-linux-armv7l/bin/npx /usr/bin/npx
 ```
 
 **6. Install the Node MQTT module (replace `<version>` and `<distro>` to match the path of your node installation)**
 ```
-cd /mnt/data/node/node-<version>-<distro>/lib
-npm install mqtt --save
+cd /mnt/data/node/node-v11.15.0-linux-armv7l/lib
+npm install mqtt:3.0.0 --save
 ```
 **7. Install MapLoader**\
 Download the content of this GIT and copy _maploader.js_ and the _maps_ subfolder to _/mnt/data/maploader/_ on the robo.\
@@ -103,7 +107,7 @@ you should see console messages about the copied files.
 Install the Node module _Forever_ (replace `<version>` and `<distro>` to match the path of your node installation)** \
 Forever monitors started node scripts and ensure that they are getting restarted, in case they exit in case of errors.
 ```
-cd /mnt/data/node/node-<version>-<distro>/lib
+cd /mnt/data/node/node-v11.15.0-linux-armv7l/lib
 npm install forever -g
 ```
 
@@ -113,5 +117,5 @@ crontab -e
 ```
 Add the following line at the end of the file (replace `<version>` and `<distro>` to match the path of your node installation):
 ```
-@reboot until [ -d /mnt/data/maploader ]; do sleep 1; done; /mnt/data/node/node-<version>-<distro>/bin/forever start /mnt/data/maploader/maploader.js
+@reboot until [ -d /mnt/data/maploader ]; do sleep 1; done; /mnt/data/node/node-v11.15.0-linux-armv7l/bin/forever start /mnt/data/maploader/maploader.js
 ```
