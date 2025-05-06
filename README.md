@@ -3,6 +3,7 @@ Map Backup/Restore for Xiaomi Vacuum and Roborock
 
 ## About this fork
 I made this fork because map loader wasn't working on my v1 vacuum because the map was saved in different files.
+This is based on the fork by @adfx (https://github.com/adfx/MapLoader)
 
 ## Description
 MapLoader is a NodeJS based service, running on the robot that listens to MQTT commands.
